@@ -16,6 +16,8 @@ lib64/
 parts/
 sdist/
 var/
+pyqtvenv/
+__pycache__/
 *.egg-info/
 .installed.cfg
 *.egg
@@ -48,3 +50,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/ 
+
+*.xlsx
+*.spec
