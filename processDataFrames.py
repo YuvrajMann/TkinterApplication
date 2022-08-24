@@ -152,11 +152,12 @@ def processDataFrame(
             outputDataFrame=outputDataFrame.sort_values('Total Working Hours',ascending=False)
             while True:
                 for idx in outputDataFrame.index:
-                    if differenceDict[client]>=0.25 :
-                        outputDataFrame.at[idx,client]=outputDataFrame[client][idx]+0.25
-                        differenceDict[client]=differenceDict[client]-0.25
-                    else:
-                        break
+                     if outputDataFrame[client][idx]!=0:
+                        if differenceDict[client]>=0.25 :
+                            outputDataFrame.at[idx,client]=outputDataFrame[client][idx]+0.25
+                            differenceDict[client]=differenceDict[client]-0.25
+                        else:
+                            break
                         
                 if differenceDict[client]<0.25:
                     break;
@@ -164,19 +165,43 @@ def processDataFrame(
             outputDataFrame=outputDataFrame.sort_values('Total Working Hours')
             while True:
                 for idx in outputDataFrame.index:
-                    if differenceDict[client]>=-0.25 :
-                        outputDataFrame.at[idx,client]=outputDataFrame[client][idx]-0.25
-                        differenceDict[client]=differenceDict[client]+0.25
-                    else:
-                        break
+                    if outputDataFrame[client][idx]!=0:
+                        if differenceDict[client]>=-0.25 :
+                            outputDataFrame.at[idx,client]=outputDataFrame[client][idx]-0.25
+                            differenceDict[client]=differenceDict[client]+0.25
+                        else:
+                            break
 
                 if differenceDict[client]>-0.25:
-                    break;
+                    break
     
     # Sorting the output frame using index value
     outputDataFrame=outputDataFrame.sort_index()
     # Converting the data frame excel and saving it at provided output location with name - HoursToCharge.xlsx
+    newRow=['','','','Total']
+    # Calculating sum for different clients
+    for client in clappedHoursDataframe['Client Name']:
+        newRow.append(outputDataFrame[client].sum())
+
+    newRow.append('')
+    newRow.append('')
+    newRow.append('')
+
+    outputDataFrame.loc[outputDataFrame.index.max()+1]=newRow
+
+    outputDataFrame.drop('Hours Worked - Hours Charged', axis=1, inplace=True)
+    outputDataFrame.drop('Ratio', axis=1, inplace=True)
+
+    # Computing the "Total Hours Charged by Employee" column
+    for idx in outputDataFrame.index:
+        totalSum=0
+        for client in clappedHoursDataframe['Client Name']:
+            totalSum+=outputDataFrame[client][idx]
+        outputDataFrame.at[idx,'Total Hours Charged by Employee']=totalSum
+
+    # Exporting output data frame to excel
     outputDataFrame.to_excel(f'{selectUploadFolder}/HoursToCharge.xlsx',index=False)
+    
     # Success message dialog box
     messagebox.showinfo(f'Processing Done',f'Successfully processed , you can find output file here - {selectUploadFolder}/HoursToCharge.xlsx')
     # Opeing the final output file on a new thread
